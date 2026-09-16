@@ -1,0 +1,25 @@
+name: meridian-iq-demo
+metadata:
+  template: meridian-iq-demo@0.1.0
+
+infra:
+  provider: bicep
+  path: ./infra
+
+services:
+  web:
+    project: .
+    host: containerapp
+    language: python
+    docker:
+      path: Dockerfile
+      context: .
+
+hooks:
+  postprovision:
+    windows:
+      shell: pwsh
+      run: ./infra/scripts/seed-search.ps1; ./infra/scripts/show-next-steps.ps1
+    posix:
+      shell: sh
+      run: ./infra/scripts/seed-search.sh && ./infra/scripts/show-next-steps.sh

@@ -1,0 +1,23 @@
+{
+  "name": "meridian-tax-knowledge",
+  "fields": [
+    { "name": "id", "type": "Edm.String", "key": true, "filterable": true },
+    { "name": "title", "type": "Edm.String", "searchable": true, "retrievable": true },
+    { "name": "content", "type": "Edm.String", "searchable": true, "retrievable": true },
+    { "name": "category", "type": "Edm.String", "filterable": true, "facetable": true },
+    { "name": "source_url", "type": "Edm.String", "retrievable": true }
+  ],
+  "semantic": {
+    "defaultConfiguration": "tax-semantic",
+    "configurations": [
+      {
+        "name": "tax-semantic",
+        "prioritizedFields": {
+          "titleField": { "fieldName": "title" },
+          "prioritizedContentFields": [{ "fieldName": "content" }],
+          "prioritizedKeywordsFields": [{ "fieldName": "category" }]
+        }
+      }
+    ]
+  }
+}
