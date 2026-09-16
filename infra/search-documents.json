@@ -1,0 +1,28 @@
+{
+  "value": [
+    {
+      "@search.action": "mergeOrUpload",
+      "id": "irs-pub-523-section-121",
+      "title": "IRS Publication 523 - Main Home Exclusion",
+      "content": "A taxpayer may exclude up to $250,000 of gain from the sale of a main home, or up to $500,000 on a qualifying joint return, when the ownership and use tests are met. The taxpayer generally must have owned and used the property as a main home for at least two years during the five-year period ending on the sale date.",
+      "category": "home-sale",
+      "source_url": "https://www.irs.gov/publications/p523"
+    },
+    {
+      "@search.action": "mergeOrUpload",
+      "id": "meridian-playbook-tx-4-7",
+      "title": "Meridian Playbook TX-4.7 - Residential Dispositions",
+      "content": "Compute amount realized as gross proceeds less direct selling expenses. Subtract adjusted basis, including substantiated capital improvements, to determine preliminary gain. Apply an eligible Internal Revenue Code Section 121 exclusion after checking ownership, use, prior exclusion, and nonqualified-use rules. Obtain the closing disclosure, original purchase statement, improvement invoices, occupancy history, and Form 1099-S.",
+      "category": "home-sale",
+      "source_url": "https://meridian.example/playbooks/tx-4-7"
+    },
+    {
+      "@search.action": "mergeOrUpload",
+      "id": "irs-topic-559-niit",
+      "title": "IRS Topic 559 - Net Investment Income Tax",
+      "content": "The Net Investment Income Tax is 3.8 percent and applies to the lesser of net investment income or the excess of modified adjusted gross income over the applicable threshold. The threshold is $200,000 for single and head-of-household filers and $250,000 for married taxpayers filing jointly.",
+      "category": "investment-tax",
+      "source_url": "https://www.irs.gov/taxtopics/tc559"
+    }
+  ]
+}
