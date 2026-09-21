@@ -4,6 +4,8 @@ targetScope = 'subscription'
 param environmentName string
 param location string
 param principalId string = ''
+// See resources.bicep for background on this parameter (Bing Grounding backend outage workaround).
+param deployBingGrounding bool = true
 
 var resourceGroupName = 'rg-${environmentName}'
 
@@ -24,6 +26,7 @@ module resources './resources.bicep' = {
     environmentName: environmentName
     location: location
     principalId: principalId
+    deployBingGrounding: deployBingGrounding
   }
 }
 

@@ -1,10 +1,18 @@
 param environmentName string
 param location string
 param principalId string = ''
+// Grounding with Bing Search (Microsoft.Bing/accounts, kind Bing.Grounding) has a known,
+// Microsoft-side backend provisioning bug affecting some subscriptions ("InternalServerError:
+// Unexpected error" on every create attempt, confirmed via Azure CLI direct resource creation
+// and via multiple public reports: https://github.com/Azure/azure-cli/issues/30029,
+// https://learn.microsoft.com/answers/questions/5940309/). This is not a template defect and
+// cannot be worked around by retrying. Set to false to deploy everything else and add Web IQ's
+// live Bing Grounding connection later once Microsoft resolves the issue (see README).
+param deployBingGrounding bool = true
 
 var suffix = uniqueString(subscription().id, resourceGroup().id, environmentName)
 var compact = take(replace(toLower(environmentName), '-', ''), 10)
-var prefix = 'miq-${take(toLower(environmentName), 12)}'
+var prefix = 'miq-${take(replace(toLower(environmentName), '-', ''), 12)}'
 var searchIndexName = 'meridian-tax-knowledge'
 var modelDeploymentName = 'gpt-5-mini'
 var searchConnectionName = 'meridian-search'
@@ -74,11 +82,6 @@ resource search 'Microsoft.Search/searchServices@2024-03-01-preview' = {
     type: 'SystemAssigned'
   }
   properties: {
-    authOptions: {
-      aadOrApiKey: {
-        aadAuthFailureMode: 'http403'
-      }
-    }
     disableLocalAuth: true
     hostingMode: 'default'
     partitionCount: 1
@@ -136,7 +139,7 @@ resource model 'Microsoft.CognitiveServices/accounts/deployments@2024-10-01' = {
   }
 }
 
-resource bing 'Microsoft.Bing/accounts@2020-06-10' = {
+resource bing 'Microsoft.Bing/accounts@2020-06-10' = if (deployBingGrounding) {
   name: 'bing-${compact}-${take(suffix, 6)}'
   location: 'global'
   kind: 'Bing.Grounding'
@@ -163,7 +166,7 @@ resource searchConnection 'Microsoft.CognitiveServices/accounts/projects/connect
 
 // Grounding with Bing currently requires an API-key project connection.
 // The key is evaluated by ARM and stored only in the connection; it is never output.
-resource bingConnection 'Microsoft.CognitiveServices/accounts/projects/connections@2025-06-01' = {
+resource bingConnection 'Microsoft.CognitiveServices/accounts/projects/connections@2025-06-01' = if (deployBingGrounding) {
   parent: project
   name: bingConnectionName
   properties: {
@@ -243,6 +246,15 @@ resource containerApp 'Microsoft.App/containerApps@2024-03-01' = {
         targetPort: 8080
         transport: 'auto'
       }
+      // Required for the Container App's system-assigned managed identity to pull images
+      // from ACR. Without this, `azd deploy` pushes an image the platform cannot pull
+      // (UNAUTHORIZED), even though the AcrPull role assignment exists.
+      registries: [
+        {
+          server: registry.properties.loginServer
+          identity: 'system'
+        }
+      ]
     }
     template: {
       containers: [
@@ -272,7 +284,7 @@ resource containerApp 'Microsoft.App/containerApps@2024-03-01' = {
             }
             {
               name: 'BING_PROJECT_CONNECTION_NAME'
-              value: bingConnection.name
+              value: deployBingGrounding ? bingConnection.name : ''
             }
           ]
           resources: {
@@ -417,7 +429,7 @@ output modelDeploymentName string = model.name
 output searchConnectionId string = searchConnection.id
 output searchIndexName string = searchIndexName
 output searchEndpoint string = 'https://${search.name}.search.windows.net'
-output bingConnectionName string = bingConnection.name
+output bingConnectionName string = deployBingGrounding ? bingConnection.name : ''
 output containerRegistryEndpoint string = registry.properties.loginServer
 output containerAppsEnvironmentName string = containerEnvironment.name
 output containerAppName string = containerApp.name
